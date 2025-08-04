@@ -1,0 +1,20 @@
+[
+  {
+    "name": "John Doe",
+    "certifications": "CFI, CFII",
+    "aircraft": "Cessna 172, Piper Archer",
+    "location": "Tampa, FL",
+    "rate": "$65/hr",
+    "calendar": "https://calendly.com/john-doe-flight",
+    "photo": "assets/images/instructor1.jpg"
+  },
+  {
+    "name": "Jane Smith",
+    "certifications": "MEI, CFI",
+    "aircraft": "Diamond DA42, Cessna 172RG",
+    "location": "Orlando, FL",
+    "rate": "$75/hr",
+    "calendar": "https://calendly.com/jane-smith-mei",
+    "photo": "assets/images/instructor2.jpg"
+  }
+]
