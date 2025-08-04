@@ -16,5 +16,32 @@
     "rate": "$75/hr",
     "calendar": "https://calendly.com/jane-smith-mei",
     "photo": "assets/images/instructor2.jpg"
+  },
+  {
+    "name": "Carlos Rivera",
+    "certifications": "CFI",
+    "aircraft": "Piper Cherokee, Cessna 150",
+    "location": "Miami, FL",
+    "rate": "$60/hr",
+    "calendar": "https://calendly.com/carlos-rivera",
+    "photo": "assets/images/instructor3.jpg"
+  },
+  {
+    "name": "Emily Zhang",
+    "certifications": "CFI, CFII, MEI",
+    "aircraft": "Beechcraft Baron, Cessna 182",
+    "location": "Jacksonville, FL",
+    "rate": "$85/hr",
+    "calendar": "https://calendly.com/emily-zhang",
+    "photo": "assets/images/instructor4.jpg"
+  },
+  {
+    "name": "Liam Patel",
+    "certifications": "CFI",
+    "aircraft": "Cirrus SR22, Diamond DA40",
+    "location": "Fort Lauderdale, FL",
+    "rate": "$70/hr",
+    "calendar": "https://calendly.com/liam-patel",
+    "photo": "assets/images/instructor5.jpg"
   }
 ]
