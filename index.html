@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Instructor Scheduler</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f8fc;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #004080;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .filters label {
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+    .filters input,
+    .filters select {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .instructor-card {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    .instructor-card img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1rem;
+    }
+    .instructor-info h3 {
+      margin: 0 0 0.5rem 0;
+      color: #004080;
+    }
+    .instructor-info p {
+      margin: 0.25rem 0;
+    }
+    .book-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .book-btn:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Find & Schedule a Flight Instructor</h1>
+  </header>
+  <div class="container">
+    <div class="filters">
+      <label for="locationFilter">Location:</label>
+      <select id="locationFilter">
+        <option value="all">All Locations</option>
+      </select>
+
+      <label for="searchInput">Search:</label>
+      <input type="text" id="searchInput" placeholder="Name or Certification">
+    </div>
+
+    <div id="instructorList"></div>
+  </div>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
