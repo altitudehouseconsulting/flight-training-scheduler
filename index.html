@@ -1,29 +1,679 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flight Instructor Scheduler</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-</head>
-<body>
-  <header>
-    <h1>Find & Schedule a Flight Instructor</h1>
-  </header>
-  <div class="container">
-    <div class="filters">
-      <label for="locationFilter">Location:</label>
-      <select id="locationFilter">
-        <option value="all">All Locations</option>
-      </select>
+  <head>
+    <!--
+      ============================================================================
+      Flight Instructor Scheduling — Image‑First Page (Single‑file HTML)
+      ----------------------------------------------------------------------------
+      Matches the look & feel of your other Altitude pages (image‑forward, clean).
+      Includes:
+        • Instructor cards (name, photo, location, ratings, aircraft, rate)
+        • Filters (name search, location, aircraft type)
+        • Profile modal with tabs: Details • Schedule • Reviews
+        • Lightweight month calendar + daily time slots (from JSON availability)
+        • Per‑instructor Reviews (sample data + client‑side form stored in localStorage)
+        • Accessible, responsive, no external dependencies
 
-      <label for="searchInput">Search:</label>
-      <input type="text" id="searchInput" placeholder="Name or Certification">
+      TODO checklist:
+        1) Replace placeholder photos & copy.
+        2) Replace sample availability with real calendars or embed Calendly.
+        3) Replace mailto: booking with your real booking process.
+        4) (Optional) Wire reviews to a backend / Google Forms instead of localStorage.
+
+      Notes:
+        • Keep your API keys out of client code unless strictly needed & restricted.
+        • This file can be used as index.html. Works on GitHub Pages/Netlify as‑is.
+    ============================================================================
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Altitude — Flight Instructor Scheduling</title>
+    <meta name="description" content="Browse instructors, check availability, and book training time. See bios, aircraft, locations, and reviews." />
+
+    <!-- ================= Brand & Theme Variables ================= -->
+    <style>
+      :root{
+        /* === Brand blues (match your existing pages) === */
+        --brand-900:#0b1f4a; --brand-800:#132b63; --brand-700:#1e3a8a; --brand-600:#2148a3;
+        --brand-500:#2563eb; --brand-400:#3b82f6; --brand-300:#60a5fa; --brand-200:#93c5fd;
+        --cyan-500:#0ea5e9;
+        /* === Neutrals === */
+        --ink-900:#0f172a; --ink-800:#1f2937; --ink-700:#334155; --ink-600:#475569; --ink-500:#64748b;
+        --ink-300:#cbd5e1; --ink-200:#e2e8f0; --ink-100:#f1f5f9; --surface:#ffffff; --bg:#f8fafc;
+        /* === Radii & Shadows === */
+        --radius-xl: 18px; --radius-lg: 14px; --radius-md: 10px; --radius-sm: 8px;
+        --shadow-lg: 0 20px 40px rgba(2,6,23,0.12); --shadow-md: 0 10px 20px rgba(2,6,23,0.10); --shadow-sm: 0 4px 10px rgba(2,6,23,0.08);
+        --container: 1180px;
+      }
+
+      /* ===== Base ===== */
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink-700);background:var(--bg);line-height:1.6}
+      img{max-width:100%;display:block;border-radius:var(--radius-lg)}
+      a{color:var(--brand-600);text-decoration:none}
+      a:hover{text-decoration:underline}
+      .container{width:92%;max-width:var(--container);margin-inline:auto}
+      .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.72rem 1rem;font-weight:600;text-decoration:none;transition:transform .06s ease,box-shadow .2s ease;cursor:pointer}
+      .btn:hover{transform:translateY(-1px);text-decoration:none}
+      .btn-primary{background:linear-gradient(135deg,var(--brand-600),var(--brand-400));color:#fff;box-shadow:var(--shadow-md)}
+      .btn-outline{border:1.5px solid var(--brand-300);color:var(--brand-700);background:#fff}
+      .pill{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .6rem;border-radius:999px;background:#eef2ff;color:var(--brand-700);font-weight:600;font-size:.8rem}
+      .tag{display:inline-block;padding:.35rem .7rem;border-radius:999px;background:linear-gradient(135deg,var(--brand-200),#e0f2fe);color:var(--brand-700);font-weight:600;font-size:.85rem}
+      h1,h2,h3{color:var(--ink-900)}
+
+      /* ===== Header / Nav ===== */
+      header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(8px);background:rgba(255,255,255,.85);border-bottom:1px solid var(--ink-200)}
+      .nav{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0}
+      .brand{display:flex;align-items:center;gap:.8rem;font-weight:800;letter-spacing:.1px;color:var(--brand-700)}
+      .brand .logo{width:42px;height:42px;border-radius:12px;background:conic-gradient(from 210deg at 50% 50%,var(--brand-400),var(--brand-700),var(--cyan-500));box-shadow:inset 0 0 0 2px rgba(255,255,255,.7),var(--shadow-sm)}
+      .nav-links{display:flex;gap:1rem;align-items:center}
+      .hamburger{display:none;border:0;background:transparent}
+      .hamburger span{display:block;width:26px;height:3px;background:var(--brand-700);margin:.32rem 0;border-radius:3px}
+      @media (max-width:900px){.nav-links{display:none}.hamburger{display:block}#mobileMenu{display:none;position:absolute;inset:100% 0 auto 0;background:#fff;border-bottom:1px solid var(--ink-200);box-shadow:var(--shadow-sm)}#mobileMenu a{display:block;padding:1rem 1.2rem;border-bottom:1px solid var(--ink-200)}}
+
+      /* ===== Hero ===== */
+      .hero{position:relative;padding:5rem 0 3rem;overflow:clip}
+      .hero::before{content:"";position:absolute;inset:0;background:
+        linear-gradient(180deg,rgba(11,31,74,.78) 10%,rgba(11,31,74,.40) 45%,rgba(248,250,252,.0) 100%),
+        url('https://images.unsplash.com/photo-1517976487492-576ea6b2936b?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat; /* TODO: replace with your own aviation image */
+        filter:saturate(1.05)}
+      .hero .content{position:relative;color:#fff;padding-top:1.25rem}
+      .eyebrow{font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;opacity:.92}
+      h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:.4rem 0 1rem;color:#fff}
+      .lead{font-size:clamp(1rem,1.6vw,1.2rem);color:#eef2ff;max-width:60ch}
+      .hero-cta{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.1rem}
+
+      /* ===== Filters ===== */
+      .filters{margin-top:1rem;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.6rem}
+      .filters input,.filters select{border:1px solid var(--ink-300);border-radius:12px;padding:.6rem .7rem;background:#fff}
+      @media (max-width:900px){.filters{grid-template-columns:1fr 1fr;}}
+
+      /* ===== Instructor Grid ===== */
+      section{padding:3.2rem 0}
+      .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.6rem}
+      .card{background:#fff;border:1px solid var(--ink-200);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .2s ease}
+      .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+      .card .media{aspect-ratio:4/3;overflow:hidden}
+      .card .body{padding:1rem 1.1rem 1.2rem}
+      .card h3{margin:.2rem 0 .4rem;font-size:1.15rem;color:var(--ink-900)}
+      .meta{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+      .rating{font-weight:700;color:var(--brand-700)}
+      @media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+      @media (max-width:620px){.grid{grid-template-columns:1fr}}
+
+      /* ===== Modal (Profile) ===== */
+      .modal{position:fixed;inset:0;background:rgba(2,6,23,.55);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:1rem;z-index:100}
+      .modal.open{display:flex}
+      .sheet{width:min(980px,96vw);background:#fff;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--ink-200)}
+      .sheet-hdr{display:flex;gap:1rem;align-items:center;padding:1rem;border-bottom:1px solid var(--ink-200)}
+      .sheet-hdr img{width:84px;height:84px;border-radius:16px;object-fit:cover}
+      .sheet-hdr .title{flex:1}
+      .sheet-hdr .title h3{margin:.1rem 0 .2rem}
+      .sheet-hdr .tags{display:flex;flex-wrap:wrap;gap:.4rem}
+      .close-btn{background:#fff;border:1px solid var(--ink-300);border-radius:10px;padding:.4rem .6rem;cursor:pointer}
+      .sheet-body{display:grid;grid-template-columns:1fr 2fr;gap:1rem;padding:1rem}
+      @media (max-width:900px){.sheet-body{grid-template-columns:1fr}}
+
+      /* Tabs within modal */
+      .tabs{display:flex;gap:.5rem;border-bottom:1px solid var(--ink-200);margin-bottom:.8rem}
+      .tab{border:1px solid var(--ink-300);border-bottom:none;background:#fff;border-top-left-radius:10px;border-top-right-radius:10px;padding:.5rem .8rem;cursor:pointer}
+      .tab[aria-selected="true"]{background:linear-gradient(135deg,var(--brand-600),var(--brand-400));color:#fff;border-color:transparent}
+      .tab-panel{display:none}
+      .tab-panel.active{display:block}
+
+      /* Calendar styles */
+      .cal{border:1px solid var(--ink-200);border-radius:12px;overflow:hidden}
+      .cal-h{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;background:#fff;border-bottom:1px solid var(--ink-200)}
+      .cal-h button{border:1px solid var(--ink-300);background:#fff;border-radius:8px;padding:.35rem .6rem;cursor:pointer}
+      .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--ink-200)}
+      .cal-grid div{background:#fff;min-height:70px;padding:.4rem}
+      .cal-grid .dow{background:#f8fafc;font-weight:700;color:var(--ink-600)}
+      .day{position:relative}
+      .day .num{font-weight:700;color:var(--ink-800)}
+      .slot-dot{position:absolute;right:6px;bottom:6px;width:8px;height:8px;border-radius:999px;background:var(--brand-500)}
+      .day.has-slots{outline:2px solid rgba(37,99,235,.2)}
+      .slots{margin-top:.6rem;display:flex;flex-wrap:wrap;gap:.4rem}
+      .slot{border:1px solid var(--ink-300);background:#fff;border-radius:999px;padding:.3rem .6rem;font-weight:600;cursor:pointer}
+
+      /* Reviews */
+      .reviews{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+      .quote{background:#fff;border:1px solid var(--ink-200);border-radius:var(--radius-xl);padding:1rem;box-shadow:var(--shadow-sm)}
+      .avatar{display:flex;align-items:center;gap:.6rem;margin-top:.4rem}
+      .avatar img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+      .review-form{border:1px dashed var(--ink-300);padding:1rem;border-radius:12px;background:#fff}
+      .review-form input,.review-form select,.review-form textarea{width:100%;border:1px solid var(--ink-300);border-radius:10px;padding:.55rem .7rem;margin:.35rem 0;background:#fff}
+      .stars{color:var(--brand-700);font-weight:700}
+      @media (max-width:900px){.reviews{grid-template-columns:1fr}}
+
+      /* Footer */
+      footer{padding:2rem 0 2.6rem;color:var(--ink-600)}
+      :focus-visible{outline:3px solid var(--cyan-500);outline-offset:2px;border-radius:6px}
+    </style>
+  </head>
+  <body>
+    <!-- ================= Header & Navigation ================= -->
+    <header>
+      <div class="container nav" role="navigation" aria-label="Main">
+        <a class="brand" href="#top" aria-label="Go to top">
+          <div class="logo" aria-hidden="true"></div>
+          <span>Altitude — Instructor Scheduling</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#instructors">Instructors</a>
+          <a href="#how">How it works</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <!-- Mobile menu button -->
+        <button class="hamburger" id="hamburger" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div id="mobileMenu" class="container" role="menu" aria-label="Mobile">
+        <a href="#instructors" role="menuitem">Instructors</a>
+        <a href="#how" role="menuitem">How it works</a>
+        <a href="#contact" role="menuitem">Contact</a>
+      </div>
+    </header>
+
+    <!-- ================= Hero ================= -->
+    <section class="hero" id="top" aria-label="Hero">
+      <div class="container content">
+        <span class="eyebrow">CFI • CFII • MEI • Ground</span>
+        <h1>Find the right instructor, see availability, and book in minutes.</h1>
+        <p class="lead">Filter by location and aircraft, open a profile for details and reviews, then select an open time.
+          We keep it visual and simple so you can focus on flying.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#instructors">Browse Instructors</a>
+          <a class="btn btn-outline" href="#how">How it works</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Instructors ================= -->
+    <section id="instructors" aria-labelledby="inst-h">
+      <div class="container">
+        <span class="tag">Available instructors</span>
+        <h2 id="inst-h">Search and filter.</h2>
+        <!-- Filters: name, location, aircraft -->
+        <div class="filters" role="toolbar" aria-label="Filters">
+          <input id="q" type="search" placeholder="Search by name…" aria-label="Search by name" />
+          <select id="loc" aria-label="Filter by location">
+            <option value="">All locations</option>
+            <option value="Sanford, FL">Sanford, FL</option>
+            <option value="Orlando, FL">Orlando, FL</option>
+            <option value="DeLand, FL">DeLand, FL</option>
+          </select>
+          <select id="aircraft" aria-label="Filter by aircraft">
+            <option value="">All aircraft</option>
+            <option value="C172">C172</option>
+            <option value="PA-28">PA‑28</option>
+            <option value="DA40">DA40</option>
+            <option value="Multi">Multi‑engine</option>
+          </select>
+          <button class="btn btn-outline" id="clearFilters">Clear</button>
+        </div>
+
+        <!-- Grid of instructor cards (populated by JS from JSON data) -->
+        <div id="grid" class="grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ================= How it works ================= -->
+    <section id="how" aria-labelledby="how-h">
+      <div class="container">
+        <span class="tag">How it works</span>
+        <h2 id="how-h">Three easy steps.</h2>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+          <article class="card"><div class="body"><span class="pill">1</span><h3>Pick an instructor</h3><p>Filter by location and aircraft. Open the profile to see bio, ratings, and hourly rate.</p></div></article>
+          <article class="card"><div class="body"><span class="pill">2</span><h3>Select a time</h3><p>Use the built‑in calendar to choose an available slot. Times are shown in your local timezone.</p></div></article>
+          <article class="card"><div class="body"><span class="pill">3</span><h3>Book</h3><p>Click a slot to start booking via email, text, or Calendly (you can replace with your flow).</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Contact CTA ================= -->
+    <section id="contact" aria-labelledby="contact-h" style="padding:3.2rem 0;">
+      <div class="container">
+        <div style="position:relative;border-radius:18px;padding:1.4rem;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));border:1px solid var(--brand-200);box-shadow:var(--shadow-md)">
+          <h2 id="contact-h">Questions or scheduling help?</h2>
+          <p class="sub">Email <a href="mailto:AltitudeHouseConsultingLLC@gmail.com">AltitudeHouseConsultingLLC@gmail.com</a> or call/text <a href="tel:+14075550182">407‑555‑0182</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Footer ================= -->
+    <footer role="contentinfo">
+      <div class="container" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;">
+        <div class="brand" style="gap:.6rem;">
+          <div class="logo" aria-hidden="true"></div>
+          <div><strong>Altitude Flight Training Network</strong><br><small>© <span id="year"></span></small></div>
+        </div>
+        <div class="socials"><a href="#">🔗</a><a href="#">🔗</a><a href="#">🔗</a></div>
+      </div>
+    </footer>
+
+    <!-- ================= Modal (Profile, Schedule, Reviews) ================= -->
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="sheet" role="document">
+        <!-- Header with photo + summary -->
+        <div class="sheet-hdr">
+          <img id="mPhoto" alt="Instructor photo" />
+          <div class="title">
+            <h3 id="modalTitle">Instructor Name</h3>
+            <div id="mMeta" class="meta"></div>
+            <div id="mTags" class="tags"></div>
+          </div>
+          <button class="close-btn" id="closeModal" aria-label="Close">✕</button>
+        </div>
+        <!-- Body with tabs -->
+        <div class="sheet-body">
+          <aside>
+            <div style="border:1px solid var(--ink-200);border-radius:12px;padding:1rem;background:#fff">
+              <h4 style="margin:.2rem 0 .6rem;color:var(--ink-900)">Contact</h4>
+              <div id="mContact"></div>
+            </div>
+            <div style="margin-top:1rem;border:1px solid var(--ink-200);border-radius:12px;padding:1rem;background:#fff">
+              <h4 style="margin:.2rem 0 .6rem;color:var(--ink-900)">About</h4>
+              <p id="mBio" style="margin:0"></p>
+            </div>
+          </aside>
+          <main>
+            <div class="tabs" role="tablist" aria-label="Profile tabs">
+              <button class="tab" id="tab-details" role="tab" aria-selected="true" aria-controls="panel-details">Details</button>
+              <button class="tab" id="tab-schedule" role="tab" aria-selected="false" aria-controls="panel-schedule">Schedule</button>
+              <button class="tab" id="tab-reviews" role="tab" aria-selected="false" aria-controls="panel-reviews">Reviews</button>
+            </div>
+            <section id="panel-details" class="tab-panel active" role="tabpanel" aria-labelledby="tab-details">
+              <div id="mDetails"></div>
+            </section>
+            <section id="panel-schedule" class="tab-panel" role="tabpanel" aria-labelledby="tab-schedule">
+              <!-- Calendar container -->
+              <div class="cal" id="cal"></div>
+              <div id="slotList" style="margin-top:.8rem"></div>
+            </section>
+            <section id="panel-reviews" class="tab-panel" role="tabpanel" aria-labelledby="tab-reviews">
+              <div class="reviews" id="mReviews"></div>
+              <div class="review-form" style="margin-top:1rem">
+                <h4 style="margin:.2rem 0 .4rem;color:var(--ink-900)">Leave a review</h4>
+                <form id="reviewForm">
+                  <input type="text" id="revName" placeholder="Your name" required />
+                  <select id="revRating" required>
+                    <option value="">Rating</option>
+                    <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+                  </select>
+                  <textarea id="revText" rows="4" placeholder="Comments" required></textarea>
+                  <button class="btn btn-primary" type="submit">Submit review</button>
+                  <small style="display:block;color:var(--ink-600);margin-top:.4rem">Saved locally for demo. Replace with your form/backend.</small>
+                </form>
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
     </div>
 
-    <div id="instructorList"></div>
-  </div>
+    <!-- ================= Scripts (No external libs) ================= -->
+    <script>
+      /* -------------------------------------------------------------
+         Data model — replace with your real instructors & availability
+         • availability: { 'YYYY-MM-DD': ['HH:MM', ...], ... }
+         • reviews: sample static reviews; new ones saved in localStorage
+      ------------------------------------------------------------- */
+      const INSTRUCTORS = [
+        {
+          id: 'alex-smith',
+          name: 'Alex Smith, CFI/CFII',
+          location: 'Sanford, FL',
+          aircraft: ['C172','PA-28'],
+          rate: '$70/hr',
+          img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop',
+          bio: '5+ years instructing. Focus on PPL/IR checkride prep. Loves teaching weather decision‑making and pattern work.',
+          ratingsAvg: 4.9, ratingsCount: 28,
+          contact: { email:'instructors+alex@altitude.example', phone:'+1-407-555-0101', calendly:'' },
+          availability: {
+            '2025-08-15':['08:00','10:00','14:00'],
+            '2025-08-16':['09:00','11:00'],
+            '2025-08-20':['07:00','13:00','15:30']
+          },
+          reviews: [
+            { author:'Taylor R.', rating:5, text:'Crystal‑clear explanations and solid cockpit flow tips.', time:'2025-07-12' },
+            { author:'Jordan M.', rating:5, text:'Great IR hood work, nailed holds after 2 sessions.', time:'2025-07-28' }
+          ]
+        },
+        {
+          id: 'morgan-lee',
+          name: 'Morgan Lee, MEI',
+          location: 'Orlando, FL',
+          aircraft: ['Multi','DA42'],
+          rate: '$95/hr',
+          img: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=600&auto=format&fit=crop',
+          bio: 'Multi‑engine specialist. Loves engine‑out scenarios and CRM. Available weekends.',
+          ratingsAvg: 4.8, ratingsCount: 19,
+          contact: { email:'instructors+morgan@altitude.example', phone:'+1-407-555-0102', calendly:'' },
+          availability: {
+            '2025-08-17':['08:30','12:30'],
+            '2025-08-21':['09:00','11:30','16:00']
+          },
+          reviews: [
+            { author:'Riley P.', rating:5, text:'Clear multi procedures. Confidence shot up fast.', time:'2025-06-30' }
+          ]
+        },
+        {
+          id: 'jamie-wu',
+          name: 'Jamie Wu, CFI/Ground',
+          location: 'DeLand, FL',
+          aircraft: ['C172','DA40'],
+          rate: '$65/hr',
+          img: 'https://images.unsplash.com/photo-1545996124-0501ebae84d5?q=80&w=600&auto=format&fit=crop',
+          bio: 'Patient ground instructor with strong fundamentals. Great for cross‑country planning and radio work.',
+          ratingsAvg: 5.0, ratingsCount: 12,
+          contact: { email:'instructors+jamie@altitude.example', phone:'+1-407-555-0103', calendly:'' },
+          availability: {
+            '2025-08-15':['13:00','15:00'],
+            '2025-08-18':['10:00','14:30'],
+            '2025-08-22':['09:00','11:00','13:00']
+          },
+          reviews: [
+            { author:'Casey W.', rating:5, text:'Made radio phraseology click. Super patient.', time:'2025-07-05' }
+          ]
+        }
+      ];
 
-  <script src="assets/js/main.js"></script>
-</body>
+      /* -------------------------------------------------------------
+         Utilities
+      ------------------------------------------------------------- */
+      const $ = sel => document.querySelector(sel);
+      const $$ = sel => Array.from(document.querySelectorAll(sel));
+      const fmtStars = (n=0) => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+      const pad2 = n => String(n).padStart(2,'0');
+      const toISODate = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+
+      /* -------------------------------------------------------------
+         Render Instructor Cards based on filters
+      ------------------------------------------------------------- */
+      const grid = $('#grid');
+      const q = $('#q');
+      const loc = $('#loc');
+      const aircraft = $('#aircraft');
+      const clearFilters = $('#clearFilters');
+
+      function matchesFilters(inst){
+        const qv = q.value.trim().toLowerCase();
+        const matchQ = !qv || inst.name.toLowerCase().includes(qv);
+        const matchLoc = !loc.value || inst.location === loc.value;
+        const matchAc = !aircraft.value || inst.aircraft.includes(aircraft.value);
+        return matchQ && matchLoc && matchAc;
+      }
+
+      function cardTemplate(inst){
+        return `
+          <article class="card" data-id="${inst.id}">
+            <div class="media"><img src="${inst.img}" alt="${inst.name}" loading="lazy"></div>
+            <div class="body">
+              <h3>${inst.name}</h3>
+              <div class="meta">
+                <span class="pill">${inst.location}</span>
+                ${inst.aircraft.map(a=>`<span class="pill">${a}</span>`).join('')}
+                <span class="pill">Rate: ${inst.rate}</span>
+              </div>
+              <div class="meta"><span class="rating">${fmtStars(inst.ratingsAvg)} (${inst.ratingsAvg.toFixed(1)} • ${inst.ratingsCount})</span></div>
+              <div style="display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap">
+                <button class="btn btn-primary" data-open="${inst.id}">View schedule</button>
+                <button class="btn btn-outline" data-profile="${inst.id}">View profile</button>
+              </div>
+            </div>
+          </article>`;
+      }
+
+      function renderGrid(){
+        const list = INSTRUCTORS.filter(matchesFilters);
+        grid.innerHTML = list.map(cardTemplate).join('');
+      }
+
+      [q,loc,aircraft].forEach(el => el.addEventListener('input', renderGrid));
+      clearFilters.addEventListener('click', ()=>{ q.value=''; loc.value=''; aircraft.value=''; renderGrid(); });
+
+      /* -------------------------------------------------------------
+         Modal: open with instructor details
+      ------------------------------------------------------------- */
+      const modal = $('#modal');
+      const mPhoto = $('#mPhoto');
+      const mMeta = $('#mMeta');
+      const mTags = $('#mTags');
+      const mBio = $('#mBio');
+      const mContact = $('#mContact');
+      const mDetails = $('#mDetails');
+      const calEl = $('#cal');
+      const slotList = $('#slotList');
+      const mReviews = $('#mReviews');
+      const closeModal = $('#closeModal');
+
+      let currentInst = null; // currently open instructor
+
+      // Tabs logic
+      const tabs = { details: $('#tab-details'), schedule: $('#tab-schedule'), reviews: $('#tab-reviews') };
+      const panels = { details: $('#panel-details'), schedule: $('#panel-schedule'), reviews: $('#panel-reviews') };
+      function switchTab(name){
+        Object.keys(tabs).forEach(key=>{
+          tabs[key].setAttribute('aria-selected', key===name ? 'true':'false');
+          panels[key].classList.toggle('active', key===name);
+        });
+      }
+      tabs.details.addEventListener('click', ()=>switchTab('details'));
+      tabs.schedule.addEventListener('click', ()=>switchTab('schedule'));
+      tabs.reviews.addEventListener('click', ()=>switchTab('reviews'));
+
+      // Open modal from any card button
+      document.addEventListener('click', e => {
+        const openId = e.target.getAttribute('data-open') || e.target.getAttribute('data-profile');
+        if (!openId) return;
+        const inst = INSTRUCTORS.find(i=>i.id===openId);
+        if (!inst) return;
+        currentInst = inst;
+        populateModal(inst);
+        modal.classList.add('open');
+        switchTab(e.target.getAttribute('data-open') ? 'schedule':'details');
+      });
+      closeModal.addEventListener('click', ()=> modal.classList.remove('open'));
+      modal.addEventListener('click', e=>{ if (e.target===modal) modal.classList.remove('open'); });
+
+      function populateModal(inst){
+        // Header
+        mPhoto.src = inst.img;
+        mPhoto.alt = inst.name;
+        $('#modalTitle').textContent = inst.name;
+        mMeta.innerHTML = `<span class="pill">${inst.location}</span> <span class="pill">${fmtStars(inst.ratingsAvg)} (${inst.ratingsAvg.toFixed(1)} • ${inst.ratingsCount})</span>`;
+        mTags.innerHTML = inst.aircraft.map(a=>`<span class="pill">${a}</span>`).join('') + ` <span class="pill">Rate: ${inst.rate}</span>`;
+        mBio.textContent = inst.bio;
+
+        // Contact
+        const mail = inst.contact?.email ? `<a href="mailto:${inst.contact.email}">${inst.contact.email}</a>` : '';
+        const phone = inst.contact?.phone ? `<a href="tel:${inst.contact.phone}">${inst.contact.phone}</a>` : '';
+        const calendly = inst.contact?.calendly ? `<a class="btn btn-outline" href="${inst.contact.calendly}" target="_blank" rel="noopener">Calendly</a>` : '';
+        mContact.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:.4rem">
+            ${mail}
+            ${phone}
+            ${calendly}
+          </div>`;
+
+        // Details panel
+        mDetails.innerHTML = `
+          <ul>
+            <li><strong>Location:</strong> ${inst.location}</li>
+            <li><strong>Aircraft:</strong> ${inst.aircraft.join(', ')}</li>
+            <li><strong>Hourly Rate:</strong> ${inst.rate}</li>
+          </ul>`;
+
+        // Schedule panel
+        renderCalendar(inst);
+        slotList.innerHTML = '<p style="color:var(--ink-600)">Select a date with availability.</p>';
+
+        // Reviews panel
+        renderReviews(inst);
+      }
+
+      /* -------------------------------------------------------------
+         Calendar rendering (month view + day slots)
+      ------------------------------------------------------------- */
+      function renderCalendar(inst){
+        calEl.innerHTML = '';
+
+        // Determine a sensible default month (today)
+        let today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth(); // 0=Jan
+
+        // Build the frame
+        const header = document.createElement('div');
+        header.className = 'cal-h';
+        const title = document.createElement('div');
+        const prev = document.createElement('button'); prev.textContent = '‹';
+        const next = document.createElement('button'); next.textContent = '›';
+        header.append(prev, title, next);
+        calEl.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'cal-grid';
+        calEl.appendChild(grid);
+
+        const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        dows.forEach(d=>{ const c=document.createElement('div'); c.textContent=d; c.className='dow'; grid.appendChild(c); });
+
+        function draw(){
+          // Update title
+          const monthName = new Date(year, month, 1).toLocaleString(undefined,{month:'long', year:'numeric'});
+          title.textContent = monthName;
+
+          // Clear old days
+          grid.querySelectorAll('.day').forEach(el=>el.remove());
+
+          // Compute first day offset & days in month
+          const first = new Date(year, month, 1);
+          const startDow = first.getDay();
+          const daysInMonth = new Date(year, month+1, 0).getDate();
+
+          // Add empty cells before the first day
+          for(let i=0;i<startDow;i++){ const c=document.createElement('div'); c.className='day'; grid.appendChild(c); }
+
+          // Add each day cell
+          for(let d=1; d<=daysInMonth; d++){
+            const cell = document.createElement('div');
+            cell.className = 'day';
+            const date = new Date(year, month, d);
+            const iso = toISODate(date);
+            const num = document.createElement('div'); num.className='num'; num.textContent = d; cell.appendChild(num);
+            const slots = currentInst.availability?.[iso] || [];
+            if (slots.length){
+              cell.classList.add('has-slots');
+              const dot = document.createElement('div'); dot.className='slot-dot'; cell.appendChild(dot);
+              cell.title = `${slots.length} slot(s) available`;
+              cell.style.cursor='pointer';
+              cell.addEventListener('click', ()=> showSlots(iso, slots));
+            }
+            grid.appendChild(cell);
+          }
+        }
+        draw();
+
+        // Nav handlers
+        prev.addEventListener('click', ()=>{ month--; if (month<0){ month=11; year--; } draw(); });
+        next.addEventListener('click', ()=>{ month++; if (month>11){ month=0; year++; } draw(); });
+      }
+
+      function showSlots(iso, slots){
+        // Render list of clickable time chips; clicking opens a mailto draft
+        const nice = new Date(iso).toLocaleDateString();
+        slotList.innerHTML = `<h4 style="margin:.2rem 0 .4rem">${nice} — available times</h4>`;
+        const wrap = document.createElement('div'); wrap.className='slots';
+        slots.forEach(t => {
+          const chip = document.createElement('button');
+          chip.className='slot';
+          chip.textContent = t;
+          chip.addEventListener('click', ()=> startBooking(currentInst, iso, t));
+          wrap.appendChild(chip);
+        });
+        slotList.appendChild(wrap);
+      }
+
+      function startBooking(inst, iso, time){
+        // Default: start an email draft; replace with your booking flow/Calendly
+        const subject = encodeURIComponent(`Flight training with ${inst.name} on ${iso} at ${time}`);
+        const body = encodeURIComponent(`Hello ${inst.name.split(',')[0]},%0A%0AI'd like to book ${iso} at ${time}.%0A%0AAircraft: ______%0ATopic (e.g., pattern, IR, checkride): ______%0A%0AThanks!`);
+        const mail = inst.contact?.email || 'AltitudeHouseConsultingLLC@gmail.com';
+        window.location.href = `mailto:${mail}?subject=${subject}&body=${body}`;
+      }
+
+      /* -------------------------------------------------------------
+         Reviews rendering + simple submit to localStorage (demo only)
+      ------------------------------------------------------------- */
+      function storageKey(instId){ return `reviews-${instId}`; }
+      function getStoredReviews(instId){
+        try{ return JSON.parse(localStorage.getItem(storageKey(instId))||'[]'); }catch{ return []; }
+      }
+      function setStoredReviews(instId, arr){
+        try{ localStorage.setItem(storageKey(instId), JSON.stringify(arr)); }catch{}
+      }
+
+      function renderReviews(inst){
+        // Merge static + stored
+        const merged = [...(inst.reviews||[]), ...getStoredReviews(inst.id)];
+        if (!merged.length){ mReviews.innerHTML = '<p style="color:var(--ink-600)">No reviews yet.</p>'; return; }
+        mReviews.innerHTML = merged.map(r => `
+          <article class="quote">
+            <p><span class="stars">${fmtStars(r.rating)}</span> • <small style="color:var(--ink-600)">${r.time||''}</small></p>
+            <p>${(r.text||'').replace(/</g,'&lt;')}</p>
+            <div class="avatar">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128&auto=format&fit=crop" alt="" />
+              <div><div style="font-weight:700;color:var(--ink-900)">${r.author||'Student'}</div></div>
+            </div>
+          </article>`).join('');
+
+        // Update header rating (simple average for demo)
+        const avg = merged.reduce((a,b)=>a+Number(b.rating||0),0)/merged.length || inst.ratingsAvg;
+        const count = merged.length;
+        mMeta.innerHTML = `<span class="pill">${inst.location}</span> <span class="pill">${fmtStars(avg)} (${avg.toFixed(1)} • ${count})</span>`;
+      }
+
+      // Handle review submission
+      const reviewForm = $('#reviewForm');
+      reviewForm.addEventListener('submit', e => {
+        e.preventDefault();
+        if (!currentInst) return;
+        const rec = {
+          author: $('#revName').value.trim() || 'Student',
+          rating: Number($('#revRating').value || 0),
+          text: $('#revText').value.trim(),
+          time: new Date().toISOString().slice(0,10)
+        };
+        const arr = getStoredReviews(currentInst.id);
+        arr.push(rec); setStoredReviews(currentInst.id, arr);
+        // Clear form
+        $('#revName').value=''; $('#revRating').value=''; $('#revText').value='';
+        // Re-render
+        renderReviews(currentInst);
+        alert('Thanks for your review! (stored locally for demo)');
+      });
+
+      /* -------------------------------------------------------------
+         Mobile nav + init
+      ------------------------------------------------------------- */
+      const hamburger = document.getElementById('hamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      hamburger?.addEventListener('click', () => {
+        const open = mobileMenu.style.display === 'block';
+        mobileMenu.style.display = open ? 'none' : 'block';
+        hamburger.setAttribute('aria-expanded', String(!open));
+      });
+      mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        mobileMenu.style.display = 'none';
+        hamburger.setAttribute('aria-expanded', 'false');
+      }));
+
+      // Initial render
+      document.getElementById('year').textContent = new Date().getFullYear();
+      renderGrid();
+    </script>
+  </body>
 </html>
