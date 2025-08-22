@@ -237,7 +237,7 @@
       <div class="container">
         <div style="position:relative;border-radius:18px;padding:1.4rem;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));border:1px solid var(--brand-200);box-shadow:var(--shadow-md)">
           <h2 id="contact-h">Questions or scheduling help?</h2>
-          <p class="sub">Email <a href="mailto:AltitudeHouseConsultingLLC@gmail.com">AltitudeHouseConsultingLLC@gmail.com</a> or call/text <a href="tel:+14075550182">407‑555‑0182</a>.</p>
+          <p class="sub">Email <a href="mailto:AltitudeHouseConsultingLLC@gmail.com">altitudehouseconsultingllc@gmail.com</a> or call/text <a href="tel:+14077921463">407‑792‑1463</a>.</p>
         </div>
       </div>
     </section>
@@ -601,7 +601,7 @@
         // Default: start an email draft; replace with your booking flow/Calendly
         const subject = encodeURIComponent(`Flight training with ${inst.name} on ${iso} at ${time}`);
         const body = encodeURIComponent(`Hello ${inst.name.split(',')[0]},%0A%0AI'd like to book ${iso} at ${time}.%0A%0AAircraft: ______%0ATopic (e.g., pattern, IR, checkride): ______%0A%0AThanks!`);
-        const mail = inst.contact?.email || 'AltitudeHouseConsultingLLC@gmail.com';
+        const mail = inst.contact?.email || 'altitudehouseconsultingllc@gmail.com';
         window.location.href = `mailto:${mail}?subject=${subject}&body=${body}`;
       }
 
