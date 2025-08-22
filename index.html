@@ -3,13 +3,13 @@
   <head>
     <!--
       ============================================================================
-      Flight Instructor Scheduling — Image‑First Page (Single‑file HTML)
+      Flight Instructor Scheduling — Image-First Page (Single-file HTML)
       ----------------------------------------------------------------------------
         • Instructor cards (name, photo, location, ratings, aircraft, rate)
         • Filters (name search, location, aircraft type)
         • Profile modal with tabs: Details • Schedule • Reviews
         • Lightweight month calendar + daily time slots (from JSON availability)
-        • Per‑instructor Reviews (sample data + client‑side form stored in localStorage)
+        • Per-instructor Reviews (sample data + client-side form stored in localStorage)
         • Accessible, responsive, no external dependencies
 
       Checklist:
@@ -87,7 +87,7 @@
       .filters input,.filters select{border:1px solid var(--ink-300);border-radius:12px;padding:.6rem .7rem;background:#fff}
       @media (max-width:900px){.filters{grid-template-columns:1fr 1fr;}}
 
-      /* ===== Instructor Grid ===== */
+      /* ===== Grids / Cards ===== */
       section{padding:3.2rem 0}
       .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.6rem}
       .card{background:#fff;border:1px solid var(--ink-200);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .2s ease}
@@ -159,6 +159,7 @@
         </a>
         <nav class="nav-links" aria-label="Primary">
           <a href="#instructors">Instructors</a>
+          <a href="#plane-rentals">Plane Rentals</a><!-- ADDED -->
           <a href="#how">How it works</a>
           <a href="#contact">Contact</a>
         </nav>
@@ -169,6 +170,7 @@
       </div>
       <div id="mobileMenu" class="container" role="menu" aria-label="Mobile">
         <a href="#instructors" role="menuitem">Instructors</a>
+        <a href="#plane-rentals" role="menuitem">Plane Rentals</a><!-- ADDED -->
         <a href="#how" role="menuitem">How it works</a>
         <a href="#contact" role="menuitem">Contact</a>
       </div>
@@ -205,15 +207,72 @@
           <select id="aircraft" aria-label="Filter by aircraft">
             <option value="">All aircraft</option>
             <option value="C172">C172</option>
-            <option value="PA-28">PA‑28</option>
+            <option value="PA-28">PA-28</option>
             <option value="DA40">DA40</option>
-            <option value="Multi">Multi‑engine</option>
+            <option value="Multi">Multi-engine</option>
           </select>
           <button class="btn btn-outline" id="clearFilters">Clear</button>
         </div>
 
         <!-- Grid of instructor cards (populated by JS from JSON data) -->
         <div id="grid" class="grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ================= Plane Rental Companies (NEW) ================= -->
+    <section id="plane-rentals" aria-labelledby="plane-rentals-h">
+      <div class="container">
+        <span class="tag">Plane rentals</span>
+        <h2 id="plane-rentals-h">Trusted companies for aircraft rental.</h2>
+        <p class="sub">Connect directly with local FBOs and operators for training and time-building rentals.</p>
+
+        <div class="grid" role="list">
+          <!-- Company 1 -->
+          <article class="card" role="listitem">
+            <div class="media">
+              <!-- TODO: Replace with company logo or stock plane photo -->
+              <img loading="lazy" src="images/company1_logo.png" alt="Company One Logo" />
+            </div>
+            <div class="body">
+              <span class="pill">Orlando Flight Rentals</span>
+              <h3>Cessna &amp; Piper Fleet</h3>
+              <p>Flexible scheduling, competitive rates, and maintenance you can trust.</p>
+              <div style="margin-top:.6rem;">
+                <a class="btn btn-outline" href="https://company1website.com" target="_blank" rel="noopener">Visit Website</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Company 2 -->
+          <article class="card" role="listitem">
+            <div class="media">
+              <img loading="lazy" src="images/company2_logo.png" alt="Company Two Logo" />
+            </div>
+            <div class="body">
+              <span class="pill">Seminole Aviation</span>
+              <h3>Multi-engine Specialists</h3>
+              <p>Well-equipped twins for commercial training and advanced endorsements.</p>
+              <div style="margin-top:.6rem;">
+                <a class="btn btn-outline" href="https://company2website.com" target="_blank" rel="noopener">Visit Website</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Company 3 -->
+          <article class="card" role="listitem">
+            <div class="media">
+              <img loading="lazy" src="images/company3_logo.png" alt="Company Three Logo" />
+            </div>
+            <div class="body">
+              <span class="pill">Daytona Flight Services</span>
+              <h3>IFR-Ready Fleet</h3>
+              <p>Great for instrument practice and long cross-country requirements.</p>
+              <div style="margin-top:.6rem;">
+                <a class="btn btn-outline" href="https://company3website.com" target="_blank" rel="noopener">Visit Website</a>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -224,7 +283,7 @@
         <h2 id="how-h">Three easy steps.</h2>
         <div class="grid" style="grid-template-columns:repeat(3,1fr);">
           <article class="card"><div class="body"><span class="pill">1</span><h3>Pick an instructor</h3><p>Filter by location and aircraft. Open the profile to see bio, ratings, and hourly rate.</p></div></article>
-          <article class="card"><div class="body"><span class="pill">2</span><h3>Select a time</h3><p>Use the built‑in calendar to choose an available slot. Times are shown in your local timezone.</p></div></article>
+          <article class="card"><div class="body"><span class="pill">2</span><h3>Select a time</h3><p>Use the built-in calendar to choose an available slot. Times are shown in your local timezone.</p></div></article>
           <article class="card"><div class="body"><span class="pill">3</span><h3>Book</h3><p>Click a slot to start booking via email, text, or Calendly (you can replace with your flow).</p></div></article>
         </div>
       </div>
@@ -235,7 +294,7 @@
       <div class="container">
         <div style="position:relative;border-radius:18px;padding:1.4rem;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));border:1px solid var(--brand-200);box-shadow:var(--shadow-md)">
           <h2 id="contact-h">Questions or scheduling help?</h2>
-          <p class="sub">Email <a href="mailto:altitudehouseconsultingllc@gmail.com">altitudehouseconsultingllc@gmail.com</a> or call/text <a href="tel:+14077921463">407‑792‑1463</a>.</p>
+          <p class="sub">Email <a href="mailto:altitudehouseconsultingllc@gmail.com">altitudehouseconsultingllc@gmail.com</a> or call/text <a href="tel:+14077921463">407-792-1463</a>.</p>
         </div>
       </div>
     </section>
@@ -315,8 +374,6 @@
     <script>
       /* -------------------------------------------------------------
          Data model — replace with your real instructors & availability
-         • availability: { 'YYYY-MM-DD': ['HH:MM', ...], ... }
-         • reviews: sample static reviews; new ones saved in localStorage
       ------------------------------------------------------------- */
       const INSTRUCTORS = [
         {
@@ -326,7 +383,7 @@
           aircraft: ['C172','PA-28'],
           rate: '$0/hr',
           img: 'https://i.pinimg.com/736x/4a/44/c3/4a44c32e1b6148e5bdae8696607d1fb2.jpg',
-          bio: '5+ years instructing. Focus on PPL/IR checkride prep. Loves teaching weather decision‑making and pattern work.',
+          bio: '5+ years instructing. Focus on PPL/IR checkride prep. Loves teaching weather decision-making and pattern work.',
           ratingsAvg: 4.9, ratingsCount: 28,
           contact: { email:'instructors+alex@altitude.example', phone:'+1-407-555-0101', calendly:'' },
           availability: {
@@ -335,7 +392,7 @@
             '2025-08-20':['07:00','13:00','15:30']
           },
           reviews: [
-            { author:'Taylor R.', rating:5, text:'Crystal‑clear explanations and solid cockpit flow tips.', time:'2025-07-12' },
+            { author:'Taylor R.', rating:5, text:'Crystal-clear explanations and solid cockpit flow tips.', time:'2025-07-12' },
             { author:'Jordan M.', rating:5, text:'Great IR hood work, nailed holds after 2 sessions.', time:'2025-07-28' }
           ]
         },
@@ -346,7 +403,7 @@
           aircraft: ['Multi','DA42'],
           rate: '$0/hr',
           img: 'https://static.vecteezy.com/system/resources/previews/002/188/518/large_2x/pilot-aviation-captain-cartoon-mascot-character-vector.jpg',
-          bio: 'Multi‑engine specialist. Loves engine‑out scenarios and CRM. Available weekends.',
+          bio: 'Multi-engine specialist. Loves engine-out scenarios and CRM. Available weekends.',
           ratingsAvg: 4.8, ratingsCount: 19,
           contact: { email:'instructors+morgan@altitude.example', phone:'+1-407-555-0102', calendly:'' },
           availability: {
@@ -364,7 +421,7 @@
           aircraft: ['C172','DA40'],
           rate: '$0/hr',
           img: 'https://static.vecteezy.com/system/resources/previews/026/960/342/original/cute-female-pilot-cartoon-character-free-png.png',
-          bio: 'Patient ground instructor with strong fundamentals. Great for cross‑country planning and radio work.',
+          bio: 'Patient ground instructor with strong fundamentals. Great for cross-country planning and radio work.',
           ratingsAvg: 5.0, ratingsCount: 12,
           contact: { email:'instructors+jamie@altitude.example', phone:'+1-407-555-0103', calendly:'' },
           availability: {
