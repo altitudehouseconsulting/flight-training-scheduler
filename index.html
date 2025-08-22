@@ -113,6 +113,22 @@
       .sheet-body{display:grid;grid-template-columns:1fr 2fr;gap:1rem;padding:1rem}
       @media (max-width:900px){.sheet-body{grid-template-columns:1fr}}
 
+      /* Plane-rental company cards: center logos, don't crop */
+#plane-rentals .media{
+  display:flex;              /* center the child img */
+  align-items:center;
+  justify-content:center;
+}
+#plane-rentals .media img{
+  width:100%;
+  height:100%;
+  object-fit:contain;        /* show whole logo */
+  object-position:center;    /* center it */
+  padding:8%;                /* breathing room */
+  border-radius:0;           /* no rounded corners on logos */
+}
+
+
       /* Tabs within modal */
       .tabs{display:flex;gap:.5rem;border-bottom:1px solid var(--ink-200);margin-bottom:.8rem}
       .tab{border:1px solid var(--ink-300);border-bottom:none;background:#fff;border-top-left-radius:10px;border-top-right-radius:10px;padding:.5rem .8rem;cursor:pointer}
